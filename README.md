@@ -9,11 +9,10 @@ This project helps you convert, organize Irish traditional music files and gener
 - **Smart tune matching** that handles "The " prefixes and variations
 - **Automatic file organization** by rhythm (jigs, reels, polkas, etc.)
 - **Anki card generation** with audio files and metadata
-- **Unified workflow** in a single script
 
 ## Usage
 
-The script has four main commands:
+The script has three main commands:
 
 ### 1. Convert audio files to mp3
 ```bash
@@ -38,14 +37,14 @@ This will:
 python3 irish_anki.py generate-cards <organized_music_directory>
 ```
 
-This will create Anki cards from already organized music files.
+This creates a ready-to-import .apkg file from already organized music files.
 
 ### 4. Do everything in one go
 ```bash
 python3 irish_anki.py all <input_directory>
 ```
 
-This combines all steps: convert to mp3, organize the files, then generate Anki cards.
+This combines all steps: convert to mp3, organize the files, then generate a ready-to-import .apkg file.
 
 ## Example Workflow
 
@@ -56,15 +55,14 @@ python3 irish_anki.py all tmp/yt-dlp/
 # This will:
 # 1. Convert all audio files to mp3 in mp3_files/
 # 2. Organize mp3s by rhythm in export/
-# 3. Generate Anki cards in anki_import/
+# 3. Generate irish_music.apkg ready to import!
 
 # Final structure:
 # - mp3_files/Cooley's.mp3, Banshee.mp3, etc.
 # - export/jig/The_Kesh (Gmaj).mp3
 # - export/reel/Cooley's (Edor).mp3
 # - export/polka/Bill_Sullivan's (Amaj).mp3
-# - anki_import/anki_cards.csv
-# - anki_import/media/jig_the_kesh.mp3
+# - irish_music.apkg (ready to import!)
 ```
 
 ## Command Options
@@ -76,54 +74,44 @@ python3 irish_anki.py convert tmp/yt-dlp/ --output converted_mp3/
 # Organize with custom output directory
 python3 irish_anki.py organize mp3_files/ --output my_music
 
-# Generate cards with custom output
-python3 irish_anki.py generate-cards export/ --output my_anki_cards
+# Generate .apkg with custom name and deck
+python3 irish_anki.py generate-cards export/ --output my_irish_music.apkg --deck-name "My Collection"
 
-# Full workflow with custom directories
-python3 irish_anki.py all tmp/yt-dlp/ --mp3-dir converted --export-dir organized --anki-dir flashcards
+# Full workflow with custom .apkg name
+python3 irish_anki.py all tmp/yt-dlp/ --output my_collection.apkg --deck-name "Traditional Irish"
 ```
 
 ## Import into Anki
 
-1. Open Anki on your computer
-2. Click "File" > "Import"
-3. Select the generated CSV file (`anki_import/anki_cards.csv`)
-4. In the import dialog:
-   - Set "Type" to "Basic"
-   - Set "Deck" to your desired deck name
-   - Ensure "Fields separated by: comma" is selected
-   - Check that "Allow HTML in fields" is enabled
-5. Click "Import"
+Just double-click the generated `.apkg` file, or:
+
+1. **Desktop Anki**: File > Import > select the `.apkg` file
+2. **AnkiDroid**: Import the `.apkg` file directly
+
+Everything is included - no manual setup needed!
 
 The cards will have:
-- **Front**: Audio file of the tune
+- **Front**: Audio file of the tune (click to play)  
 - **Back**: Rhythm, key, and title
+
 
 ## AnkiDroid
 
 To use these cards on your Android device:
 
 1. Install AnkiDroid from the Google Play Store
-2. On your computer, export your deck:
-   - Open Anki Desktop
-   - Select your deck
-   - Click "File" > "Export"
-   - Choose "Anki Deck Package (.apkg)" as format
-   - Save the file
-3. On your Android device:
-   - Copy the .apkg file to your device
-   - Open AnkiDroid
-   - Tap the three dots menu
-   - Select "Import"
-   - Navigate to and select the .apkg file
-   - The deck will be imported
+2. Copy the generated `.apkg` file to your device
+3. Open AnkiDroid and tap the three dots menu
+4. Select "Import" and navigate to the `.apkg` file
+5. The deck will be imported with all audio files included
 
 ## Requirements
 
 - Python 3.6+
 - Python packages:
   - `requests`
-  - `beautifulsoup4`
+  - `beautifulsoup4` 
+  - `genanki` (for .apkg generation)
 - [ffmpeg](https://ffmpeg.org/download.html) for audio conversion
 - [Anki](https://apps.ankiweb.net/) for importing cards
 

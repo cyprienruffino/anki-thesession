@@ -1,22 +1,19 @@
 #!/usr/bin/env python3
 
-import os
-import sys
 import time
 import re
 import shutil
-import csv
 import argparse
 import subprocess
 from pathlib import Path
 from urllib.parse import quote_plus
-from typing import List, Tuple, Optional
+from typing import List, Tuple
 import requests
 from bs4 import BeautifulSoup
+import genanki
 
 
 def respectful_delay():
-    """Add a respectful delay between requests"""
     time.sleep(2)  # 2 seconds between requests to be respectful
 
 
@@ -42,7 +39,6 @@ def convert_to_mp3(input_dir, output_dir="mp3_files"):
     # Supported audio formats
     audio_extensions = ['.m4a', '.wav', '.flac', '.aac', '.ogg', '.mp4', '.webm']
     
-    # Find all audio files
     audio_files = []
     for ext in audio_extensions:
         audio_files.extend(input_path.rglob(f'*{ext}'))
@@ -62,7 +58,6 @@ def convert_to_mp3(input_dir, output_dir="mp3_files"):
         filename_no_ext = audio_file.stem
         output_file = output_path / f"{filename_no_ext}.mp3"
         
-        # Skip if already exists
         if output_file.exists():
             print(f"[{i}/{len(audio_files)}] Skipping (already exists): {audio_file.name}")
             skipped += 1
@@ -373,16 +368,15 @@ def process_music_directory(music_dir: Path) -> List[dict]:
     return cards
 
 
-def generate_anki_cards(music_dir, output_dir="anki_import"):
-    """Generate Anki cards from organized music files"""
+
+def generate_apkg(music_dir, output_file="irish_music.apkg", deck_name="Irish Traditional Music"):
     music_path = Path(music_dir)
-    output_path = Path(output_dir)
     
     if not music_path.exists():
         print(f"Error: Music directory '{music_dir}' not found!")
         return False
     
-    print("Processing music directory for Anki cards...")
+    print("Processing music directory for .apkg generation...")
     cards = process_music_directory(music_path)
     
     if not cards:
@@ -391,42 +385,62 @@ def generate_anki_cards(music_dir, output_dir="anki_import"):
     
     print(f"Found {len(cards)} cards to generate")
     
-    output_path.mkdir(exist_ok=True)
-    media_dir = output_path / "media"
-    media_dir.mkdir(exist_ok=True)
+    # Create Anki model (card template)
+    model = genanki.Model(
+        1607392319,  # Random model ID
+        'Irish Traditional Music',
+        fields=[
+            {'name': 'Audio'},
+            {'name': 'Info'},
+        ],
+        templates=[
+            {
+                'name': 'Card 1',
+                'qfmt': '{{Audio}}',
+                'afmt': '{{FrontSide}}<hr id="answer">{{Info}}',
+            },
+        ])
     
-    print("Copying audio files...")
+    # Create deck
+    deck = genanki.Deck(
+        2059400110,  # Random deck ID
+        deck_name)
+    
+    # Create notes and collect media files
+    media_files = []
+    
     for card in cards:
-        src_file = card['original_file']
-        dst_file = media_dir / card['clean_filename']
-        shutil.copy2(src_file, dst_file)
-        print(f"  {src_file.name} -> {card['clean_filename']}")
-    
-    csv_file = output_path / "anki_cards.csv"
-    print(f"\nCreating CSV file: {csv_file}")
-    
-    with open(csv_file, 'w', newline='', encoding='utf-8') as f:
-        writer = csv.writer(f)
-        writer.writerow(['Front', 'Back'])
+        # Get the actual filename that will be in the package
+        original_filename = card['original_file'].name
         
-        for card in cards:
-            front = f"[sound:{card['clean_filename']}]"
-            back = (f"<b>Rhythm:</b> {card['rhythm']}<br>"
-                   f"<b>Key:</b> {card['key']}<br>"
-                   f"<b>Title:</b> {card['title']}")
-            
-            writer.writerow([front, back])
+        # Create note
+        note = genanki.Note(
+            model=model,
+            fields=[
+                f"[sound:{original_filename}]",
+                f"<b>Rhythm:</b> {card['rhythm']}<br><b>Key:</b> {card['key']}<br><b>Title:</b> {card['title']}"
+            ])
+        
+        deck.add_note(note)
+        media_files.append(str(card['original_file']))
     
-    print(f"\nGenerated {len(cards)} Anki cards!")
-    print(f"Files created:")
-    print(f"   - anki_cards.csv ({len(cards)} cards)")
-    print(f"   - media/ directory with {len(cards)} audio files")
-    print(f"\nTo import into AnkiDroid:")
-    print(f"   1. Copy the entire '{output_dir}' folder to your device")
-    print(f"   2. In AnkiDroid, go to Import and select 'anki_cards.csv'")
-    print(f"   3. The audio files will be automatically linked")
+    # Generate package
+    output_path = Path(output_file)
+    print(f"\nGenerating .apkg file: {output_path}")
+    
+    package = genanki.Package(deck)
+    package.media_files = media_files
+    package.write_to_file(str(output_path))
+    
+    print(f"Generated {output_path} with {len(cards)} cards!")
+    print(f"Ready to import: Just double-click the .apkg file or import in Anki/AnkiDroid")
     
     return True
+
+
+def generate_anki_cards(music_dir, output_file="irish_music.apkg", deck_name="Irish Traditional Music"):
+    """Generate Anki cards as .apkg file"""
+    return generate_apkg(music_dir, output_file, deck_name)
 
 
 def main():
@@ -441,15 +455,17 @@ def main():
     organize_parser.add_argument('input_dir', help='Directory containing mp3 files to organize')
     organize_parser.add_argument('--output', default='export', help='Output directory (default: export)')
     
-    generate_parser = subparsers.add_parser('generate-cards', help='Generate Anki cards from organized music files')
+    generate_parser = subparsers.add_parser('generate-cards', help='Generate Anki .apkg file from organized music files')
     generate_parser.add_argument('music_dir', help='Directory containing organized music files')
-    generate_parser.add_argument('--output', default='anki_import', help='Output directory (default: anki_import)')
+    generate_parser.add_argument('--output', default='irish_music.apkg', help='Output .apkg file (default: irish_music.apkg)')
+    generate_parser.add_argument('--deck-name', default='Irish Traditional Music', help='Deck name (default: Irish Traditional Music)')
     
-    all_parser = subparsers.add_parser('all', help='Convert to mp3, organize files and generate Anki cards')
+    all_parser = subparsers.add_parser('all', help='Convert to mp3, organize files and generate Anki .apkg')
     all_parser.add_argument('input_dir', help='Directory containing audio files to process')
     all_parser.add_argument('--mp3-dir', default='mp3_files', help='Intermediate directory for mp3 files (default: mp3_files)')
     all_parser.add_argument('--export-dir', default='export', help='Intermediate directory for organized files (default: export)')
-    all_parser.add_argument('--anki-dir', default='anki_import', help='Output directory for Anki cards (default: anki_import)')
+    all_parser.add_argument('--output', default='irish_music.apkg', help='Output .apkg file (default: irish_music.apkg)')
+    all_parser.add_argument('--deck-name', default='Irish Traditional Music', help='Deck name (default: Irish Traditional Music)')
     
     args = parser.parse_args()
     
@@ -464,15 +480,15 @@ def main():
         organize_music_files(args.input_dir, args.output)
     
     elif args.command == 'generate-cards':
-        generate_anki_cards(args.music_dir, args.output)
+        generate_anki_cards(args.music_dir, args.output, args.deck_name)
     
     elif args.command == 'all':
         print("Step 1: Converting audio files to mp3...")
         if convert_to_mp3(args.input_dir, args.mp3_dir):
             print(f"\nStep 2: Organizing music files...")
             if organize_music_files(args.mp3_dir, args.export_dir):
-                print(f"\nStep 3: Generating Anki cards...")
-                generate_anki_cards(args.export_dir, args.anki_dir)
+                print(f"\nStep 3: Generating Anki .apkg file...")
+                generate_anki_cards(args.export_dir, args.output, args.deck_name)
             else:
                 print("Organization failed, skipping Anki card generation")
         else:

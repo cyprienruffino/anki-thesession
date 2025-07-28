@@ -53,3 +53,4 @@ tmp/
 anki_import/
 export/
 *.csv
+*.apkg
