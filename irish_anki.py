@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import random
 import time
 import re
 import shutil
@@ -369,7 +370,7 @@ def process_music_directory(music_dir: Path) -> List[dict]:
 
 
 
-def generate_apkg(music_dir, output_file="irish_music.apkg", deck_name="Irish Traditional Music"):
+def generate_apkg(music_dir, output_file="irish_music.apkg", deck_name="Irish Traditional Music", randomize_cards=True):
     music_path = Path(music_dir)
     
     if not music_path.exists():
@@ -383,7 +384,12 @@ def generate_apkg(music_dir, output_file="irish_music.apkg", deck_name="Irish Tr
         print("No valid music files found!")
         return False
     
-    print(f"Found {len(cards)} cards to generate")
+    # Randomize the cards if requested
+    if randomize_cards:
+        random.shuffle(cards)
+        print(f"Found {len(cards)} cards to generate (randomized order)")
+    else:
+        print(f"Found {len(cards)} cards to generate (original order)")
     
     # Create Anki model (card template)
     model = genanki.Model(
@@ -401,19 +407,15 @@ def generate_apkg(music_dir, output_file="irish_music.apkg", deck_name="Irish Tr
             },
         ])
     
-    # Create deck
     deck = genanki.Deck(
-        2059400110,  # Random deck ID
+        random.randint(1000000000, 9999999999),  # Random deck ID
         deck_name)
     
-    # Create notes and collect media files
     media_files = []
     
     for card in cards:
-        # Get the actual filename that will be in the package
         original_filename = card['original_file'].name
         
-        # Create note
         note = genanki.Note(
             model=model,
             fields=[
@@ -424,7 +426,6 @@ def generate_apkg(music_dir, output_file="irish_music.apkg", deck_name="Irish Tr
         deck.add_note(note)
         media_files.append(str(card['original_file']))
     
-    # Generate package
     output_path = Path(output_file)
     print(f"\nGenerating .apkg file: {output_path}")
     
@@ -433,14 +434,16 @@ def generate_apkg(music_dir, output_file="irish_music.apkg", deck_name="Irish Tr
     package.write_to_file(str(output_path))
     
     print(f"Generated {output_path} with {len(cards)} cards!")
+    if randomize_cards:
+        print("Cards have been randomized for varied study sessions!")
     print(f"Ready to import: Just double-click the .apkg file or import in Anki/AnkiDroid")
     
     return True
 
 
-def generate_anki_cards(music_dir, output_file="irish_music.apkg", deck_name="Irish Traditional Music"):
+def generate_anki_cards(music_dir, output_file="irish_music.apkg", deck_name="Irish Traditional Music", randomize_cards=True):
     """Generate Anki cards as .apkg file"""
-    return generate_apkg(music_dir, output_file, deck_name)
+    return generate_apkg(music_dir, output_file, deck_name, randomize_cards)
 
 
 def main():
@@ -459,6 +462,7 @@ def main():
     generate_parser.add_argument('music_dir', help='Directory containing organized music files')
     generate_parser.add_argument('--output', default='irish_music.apkg', help='Output .apkg file (default: irish_music.apkg)')
     generate_parser.add_argument('--deck-name', default='Irish Traditional Music', help='Deck name (default: Irish Traditional Music)')
+    generate_parser.add_argument('--no-randomize', action='store_true', help='Keep cards in original order instead of randomizing')
     
     all_parser = subparsers.add_parser('all', help='Convert to mp3, organize files and generate Anki .apkg')
     all_parser.add_argument('input_dir', help='Directory containing audio files to process')
@@ -466,6 +470,7 @@ def main():
     all_parser.add_argument('--export-dir', default='export', help='Intermediate directory for organized files (default: export)')
     all_parser.add_argument('--output', default='irish_music.apkg', help='Output .apkg file (default: irish_music.apkg)')
     all_parser.add_argument('--deck-name', default='Irish Traditional Music', help='Deck name (default: Irish Traditional Music)')
+    all_parser.add_argument('--no-randomize', action='store_true', help='Keep cards in original order instead of randomizing')
     
     args = parser.parse_args()
     
@@ -480,7 +485,7 @@ def main():
         organize_music_files(args.input_dir, args.output)
     
     elif args.command == 'generate-cards':
-        generate_anki_cards(args.music_dir, args.output, args.deck_name)
+        generate_anki_cards(args.music_dir, args.output, args.deck_name, not args.no_randomize)
     
     elif args.command == 'all':
         print("Step 1: Converting audio files to mp3...")
@@ -488,7 +493,7 @@ def main():
             print(f"\nStep 2: Organizing music files...")
             if organize_music_files(args.mp3_dir, args.export_dir):
                 print(f"\nStep 3: Generating Anki .apkg file...")
-                generate_anki_cards(args.export_dir, args.output, args.deck_name)
+                generate_anki_cards(args.export_dir, args.output, args.deck_name, not args.no_randomize)
             else:
                 print("Organization failed, skipping Anki card generation")
         else:
