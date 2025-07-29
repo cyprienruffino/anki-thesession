@@ -1,6 +1,6 @@
 # Irish Traditional Music Anki Cards
 
-This project helps you convert, organize Irish traditional music files and generate Anki flashcards from them. It uses ffmpeg for audio conversion and [The Session](https://thesession.org/) to automatically find metadata (key, rhythm, proper title) for each tune and organizes your collection accordingly. I do not provide tunes, you'll have to bring them yourself.
+This project helps you convert, organize Irish traditional music files and generate Anki flashcards from them. It uses ffmpeg for audio conversion and [The Session](https://thesession.org/) to automatically find metadata (key, rhythm, proper title) for each tune and organizes your collection accordingly. I do not provide tunes, you'll have to bring them yourself, for example by ["ripping albums"](https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#installation)
 
 ## Features
 
