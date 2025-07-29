@@ -19,7 +19,7 @@ def respectful_delay():
 
 
 def convert_to_mp3(input_dir, output_dir="mp3_files"):
-    """Convert various audio formats to mp3 using ffmpeg"""
+    """Convert various audio formats to mp3 using ffmpeg, or copy existing MP3s if needed"""
     input_path = Path(input_dir)
     output_path = Path(output_dir)
     
@@ -27,72 +27,122 @@ def convert_to_mp3(input_dir, output_dir="mp3_files"):
         print(f"Error: Input directory '{input_dir}' does not exist")
         return False
     
-    # Check if ffmpeg is available
-    try:
-        subprocess.run(['ffmpeg', '-version'], capture_output=True, check=True)
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        print("Error: ffmpeg is not installed or not in PATH")
-        print("Please install ffmpeg: https://ffmpeg.org/download.html")
-        return False
-    
     output_path.mkdir(exist_ok=True)
     
-    # Supported audio formats
+    # Check for existing MP3 files
+    mp3_files = list(input_path.glob("*.mp3"))
+    
+    # Supported audio formats for conversion (excluding MP3)
     audio_extensions = ['.m4a', '.wav', '.flac', '.aac', '.ogg', '.mp4', '.webm']
     
     audio_files = []
     for ext in audio_extensions:
         audio_files.extend(input_path.rglob(f'*{ext}'))
     
-    if not audio_files:
+    # If no files to convert and no MP3s, return error
+    if not audio_files and not mp3_files:
         print(f"No audio files found in '{input_dir}'")
+        print(f"Supported formats: .mp3, {', '.join(audio_extensions)}")
         return False
     
-    print(f"Found {len(audio_files)} audio files to convert")
-    print(f"Converting to mp3 format in '{output_dir}'...")
+    # If input and output are the same directory and we have MP3s, no work needed
+    if input_path.resolve() == output_path.resolve() and mp3_files:
+        print(f"Input directory already contains {len(mp3_files)} MP3 files")
+        print(f"No conversion or copying needed (input and output are the same)")
+        return True
+    
+    # Check if ffmpeg is available (only if we have files to convert)
+    if audio_files:
+        try:
+            subprocess.run(['ffmpeg', '-version'], capture_output=True, check=True)
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            print("Error: ffmpeg is not installed or not in PATH")
+            print("Please install ffmpeg: https://ffmpeg.org/download.html")
+            if mp3_files:
+                print(f"Note: Found {len(mp3_files)} MP3 files that could be copied instead")
+            return False
     
     converted = 0
+    copied = 0
     skipped = 0
     failed = 0
+    total_operations = len(audio_files) + len(mp3_files)
+    current_op = 0
     
-    for i, audio_file in enumerate(audio_files, 1):
-        filename_no_ext = audio_file.stem
-        output_file = output_path / f"{filename_no_ext}.mp3"
+    # Convert non-MP3 files
+    if audio_files:
+        print(f"Found {len(audio_files)} audio files to convert")
         
-        if output_file.exists():
-            print(f"[{i}/{len(audio_files)}] Skipping (already exists): {audio_file.name}")
-            skipped += 1
-            continue
-        
-        print(f"[{i}/{len(audio_files)}] Converting: {audio_file.name}")
-        
-        try:
-            # Convert to mp3 with good quality settings
-            result = subprocess.run([
-                'ffmpeg', '-i', str(audio_file),
-                '-codec:a', 'libmp3lame',
-                '-b:a', '192k',
-                '-y', str(output_file)
-            ], capture_output=True, text=True)
+        for audio_file in audio_files:
+            current_op += 1
+            filename_no_ext = audio_file.stem
+            output_file = output_path / f"{filename_no_ext}.mp3"
             
-            if result.returncode == 0:
-                print(f"  ✓ Success: {filename_no_ext}.mp3")
-                converted += 1
-            else:
-                print(f"  ✗ Failed: {audio_file.name}")
-                failed += 1
+            if output_file.exists():
+                print(f"[{current_op}/{total_operations}] Skipping (already exists): {audio_file.name}")
+                skipped += 1
+                continue
+            
+            print(f"[{current_op}/{total_operations}] Converting: {audio_file.name}")
+            
+            try:
+                # Convert to mp3 with good quality settings
+                result = subprocess.run([
+                    'ffmpeg', '-i', str(audio_file),
+                    '-codec:a', 'libmp3lame',
+                    '-b:a', '192k',
+                    '-y', str(output_file)
+                ], capture_output=True, text=True)
                 
-        except Exception as e:
-            print(f"  ✗ Error converting {audio_file.name}: {e}")
-            failed += 1
+                if result.returncode == 0:
+                    print(f"  ✓ Success: {filename_no_ext}.mp3")
+                    converted += 1
+                else:
+                    print(f"  ✗ Failed: {audio_file.name}")
+                    failed += 1
+                    
+            except Exception as e:
+                print(f"  ✗ Error converting {audio_file.name}: {e}")
+                failed += 1
     
-    print(f"\nConversion complete!")
-    print(f"  Converted: {converted}")
-    print(f"  Skipped: {skipped}")
-    print(f"  Failed: {failed}")
+    # Copy existing MP3 files if output directory is different
+    if mp3_files:
+        if audio_files:
+            print(f"\nFound {len(mp3_files)} existing MP3 files to copy")
+        else:
+            print(f"Found {len(mp3_files)} MP3 files to copy to output directory")
+        
+        for mp3_file in mp3_files:
+            current_op += 1
+            output_file = output_path / mp3_file.name
+            
+            if output_file.exists():
+                print(f"[{current_op}/{total_operations}] Skipping (already exists): {mp3_file.name}")
+                skipped += 1
+                continue
+            
+            print(f"[{current_op}/{total_operations}] Copying: {mp3_file.name}")
+            
+            try:
+                shutil.copy2(str(mp3_file), str(output_file))
+                print(f"  ✓ Copied: {mp3_file.name}")
+                copied += 1
+            except Exception as e:
+                print(f"  ✗ Error copying {mp3_file.name}: {e}")
+                failed += 1
+    
+    print(f"\nOperation complete!")
+    if converted > 0:
+        print(f"  Converted: {converted}")
+    if copied > 0:
+        print(f"  Copied: {copied}")
+    if skipped > 0:
+        print(f"  Skipped: {skipped}")
+    if failed > 0:
+        print(f"  Failed: {failed}")
     print(f"MP3 files are in: {output_dir}")
     
-    return converted > 0
+    return (converted + copied) > 0
 
 
 def search_tune_on_thesession(tune_name):
@@ -370,12 +420,19 @@ def process_music_directory(music_dir: Path) -> List[dict]:
 
 
 
-def generate_apkg(music_dir, output_file="irish_music.apkg", deck_name="Irish Traditional Music", randomize_cards=True):
+def generate_apkg(music_dir, output_file="irish_music.apkg", deck_name="Irish Traditional Music", randomize_cards=True, card_layout=None):
     music_path = Path(music_dir)
     
     if not music_path.exists():
         print(f"Error: Music directory '{music_dir}' not found!")
         return False
+    
+    # Default layout if none provided
+    if card_layout is None:
+        card_layout = {
+            'front': {'name': False, 'audio': True, 'key': False, 'rhythm': False},
+            'back': {'name': True, 'audio': False, 'key': True, 'rhythm': True}
+        }
     
     print("Processing music directory for .apkg generation...")
     cards = process_music_directory(music_path)
@@ -391,19 +448,69 @@ def generate_apkg(music_dir, output_file="irish_music.apkg", deck_name="Irish Tr
     else:
         print(f"Found {len(cards)} cards to generate (original order)")
     
-    # Create Anki model (card template)
+    # Build front and back content based on layout
+    def build_card_content(side_layout, card_data, filename):
+        content_parts = []
+        
+        if side_layout['name']:
+            content_parts.append(f"<div class='field-name'><b>{card_data['title']}</b></div>")
+        
+        if side_layout['audio']:
+            content_parts.append(f"<div class='field-audio'>[sound:{filename}]</div>")
+            
+        if side_layout['key']:
+            content_parts.append(f"<div class='field-key'><b>Key:</b> {card_data['key']}</div>")
+            
+        if side_layout['rhythm']:
+            content_parts.append(f"<div class='field-rhythm'><b>Rhythm:</b> {card_data['rhythm']}</div>")
+        
+        return '<br>'.join(content_parts) if content_parts else ''
+    
+    # Log the layout being used
+    front_items = [k for k, v in card_layout['front'].items() if v]
+    back_items = [k for k, v in card_layout['back'].items() if v]
+    print(f"Card layout: Front: {', '.join(front_items) if front_items else 'empty'} | Back: {', '.join(back_items) if back_items else 'empty'}")
+    
+    # Create Anki model (card template) with dynamic content
     model = genanki.Model(
-        1607392319,  # Random model ID
-        'Irish Traditional Music',
+        1607392320,  # Different model ID for custom layout
+        'Irish Traditional Music (Custom)',
         fields=[
-            {'name': 'Audio'},
-            {'name': 'Info'},
+            {'name': 'Front'},
+            {'name': 'Back'},
         ],
         templates=[
             {
-                'name': 'Card 1',
-                'qfmt': '{{Audio}}',
-                'afmt': '{{FrontSide}}<hr id="answer">{{Info}}',
+                'name': 'Irish Traditional Card',
+                'qfmt': '''
+                <div class="card-front">
+                {{Front}}
+                </div>
+                <style>
+                .card { font-family: arial; font-size: 20px; text-align: center; }
+                .field-name { font-size: 24px; color: #2c5f2d; margin: 10px 0; }
+                .field-audio { margin: 15px 0; }
+                .field-key { color: #1f4788; margin: 5px 0; }
+                .field-rhythm { color: #8b4513; margin: 5px 0; }
+                </style>
+                ''',
+                'afmt': '''
+                <div class="card-front">
+                {{Front}}
+                </div>
+                <hr id="answer">
+                <div class="card-back">
+                {{Back}}
+                </div>
+                <style>
+                .card { font-family: arial; font-size: 20px; text-align: center; }
+                .field-name { font-size: 24px; color: #2c5f2d; margin: 10px 0; }
+                .field-audio { margin: 15px 0; }
+                .field-key { color: #1f4788; margin: 5px 0; }
+                .field-rhythm { color: #8b4513; margin: 5px 0; }
+                .card-back { margin-top: 20px; }
+                </style>
+                ''',
             },
         ])
     
@@ -416,12 +523,19 @@ def generate_apkg(music_dir, output_file="irish_music.apkg", deck_name="Irish Tr
     for card in cards:
         original_filename = card['original_file'].name
         
+        # Build front and back content based on user selection
+        front_content = build_card_content(card_layout['front'], card, original_filename)
+        back_content = build_card_content(card_layout['back'], card, original_filename)
+        
+        # Ensure we don't have completely empty cards
+        if not front_content and not back_content:
+            front_content = f"[sound:{original_filename}]"  # Fallback to audio
+            back_content = f"<b>Title:</b> {card['title']}"  # Fallback to title
+        
         note = genanki.Note(
             model=model,
-            fields=[
-                f"[sound:{original_filename}]",
-                f"<b>Rhythm:</b> {card['rhythm']}<br><b>Key:</b> {card['key']}<br><b>Title:</b> {card['title']}"
-            ])
+            fields=[front_content, back_content]
+        )
         
         deck.add_note(note)
         media_files.append(str(card['original_file']))
@@ -441,9 +555,15 @@ def generate_apkg(music_dir, output_file="irish_music.apkg", deck_name="Irish Tr
     return True
 
 
-def generate_anki_cards(music_dir, output_file="irish_music.apkg", deck_name="Irish Traditional Music", randomize_cards=True):
+def generate_anki_cards(music_dir, output_file="irish_music.apkg", deck_name="Irish Traditional Music", randomize_cards=True, card_layout=None):
     """Generate Anki cards as .apkg file"""
-    return generate_apkg(music_dir, output_file, deck_name, randomize_cards)
+    if card_layout is None:
+        # Default layout: Audio on front, Name + Key + Rhythm on back
+        card_layout = {
+            'front': {'name': False, 'audio': True, 'key': False, 'rhythm': False},
+            'back': {'name': True, 'audio': False, 'key': True, 'rhythm': True}
+        }
+    return generate_apkg(music_dir, output_file, deck_name, randomize_cards, card_layout)
 
 
 def main():
@@ -472,6 +592,8 @@ def main():
     all_parser.add_argument('--deck-name', default='Irish Traditional Music', help='Deck name (default: Irish Traditional Music)')
     all_parser.add_argument('--no-randomize', action='store_true', help='Keep cards in original order instead of randomizing')
     
+    gui_parser = subparsers.add_parser('gui', help='Launch the graphical user interface')
+    
     args = parser.parse_args()
     
     if not args.command:
@@ -486,6 +608,14 @@ def main():
     
     elif args.command == 'generate-cards':
         generate_anki_cards(args.music_dir, args.output, args.deck_name, not args.no_randomize)
+    
+    elif args.command == 'gui':
+        try:
+            from gui import IrishAnkiGUI
+            app = IrishAnkiGUI()
+            app.run()
+        except ImportError:
+            print("Error: GUI dependencies not installed. Please run: pip install dearpygui")
     
     elif args.command == 'all':
         print("Step 1: Converting audio files to mp3...")

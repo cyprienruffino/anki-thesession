@@ -1,134 +1,180 @@
 # Irish Traditional Music Anki Cards
 
-This project helps you convert, organize Irish traditional music files and generate Anki flashcards from them. It uses ffmpeg for audio conversion and [The Session](https://thesession.org/) to automatically find metadata (key, rhythm, proper title) for each tune and organizes your collection accordingly. I do not provide tunes, you'll have to bring them yourself, for example by ["ripping your own albums"](https://github.com/makuguren/Spotify-Playlist-Downloader) or ["recording yourself"](https://github.com/yt-dlp/yt-dlp).
+This tool generates Anki flashcards from Irish traditional music files. It uses ffmpeg for audio conversion and [The Session](https://thesession.org/) to automatically find metadata (key, rhythm, proper title) for each tune. 
 
-## Features
+**Note**: This tool does not provide music files - you must bring your own legally obtained Irish traditional music collection, for example by ["ripping your own albums"](https://github.com/makuguren/Spotify-Playlist-Downloader) or ["recording yourself"](https://github.com/yt-dlp/yt-dlp).
+
+
+![Irish Anki GUI](screenshot.jpg)
 
 - **Audio conversion** from various formats (m4a, wav, flac, aac, ogg, mp4, webm) to mp3 using ffmpeg
 - **Respectful web scraping** of thesession.org with appropriate delays
 - **Smart tune matching** that handles "The " prefixes and variations
 - **Automatic file organization** by rhythm (jigs, reels, polkas, etc.)
+- **Customizable card layouts** - choose what appears on front/back (name, audio, key, rhythm)
 - **Anki card generation** with audio files and metadata
 
 ## Usage
 
-The script has three main commands:
+## 🚀 Quick Start
 
-### 1. Convert audio files to mp3
+### Option 1: Use the GUI (Recommended)
+
+**Windows Users**: Download the latest `IrishAnki.exe` from [Releases](../../releases) - no installation required
+
+**Linux/Mac Users**: 
 ```bash
-python3 irish_anki.py convert <input_directory>
+# Clone and setup
+git clone <this-repository>
+cd anki-irish
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+
+# Run the GUI
+python gui.py
 ```
 
-This will convert various audio formats (m4a, wav, flac, aac, ogg, mp4, webm) to mp3 using ffmpeg.
+### Using the GUI:
 
-### 2. Organize files only
-```bash
-python3 irish_anki.py organize <mp3_directory>
+1. **📁 Select Input Directory**: Click "Browse" to navigate and visually confirm your audio files
+2. **⚙️ Configure Options**: Set output paths and deck name (defaults work great!)
+3. **🎴 Customize Card Layout**: Choose what appears on front/back of your Anki cards
+4. **🎯 Click "Run All Steps"**: Sit back and watch the magic happen
+5. **📱 Import to Anki**: Double-click the generated `.apkg` file
+
+## 🎵 How It Works
+
+The workflow transforms your raw audio files into organized Anki cards:
+
+**Audio Files → MP3 → Organized by Rhythm → Anki Deck**
+
+1. **🎵 PROCESS**: Converts audio formats (.m4a, .wav, .flac, etc.) to MP3 or copies existing MP3s
+2. **🗂️ ORGANIZE**: Searches thesession.org for metadata and organizes by rhythm  
+3. **🎴 GENERATE**: Creates Anki .apkg file with audio cards
+
+## 🎯 Example Workflow
+
+```
+Input Directory:
+├── Cooley's Reel.m4a
+├── The Kesh Jig.wav
+├── Bill Sullivan's Polka.mp3
+└── Random Song.flac
+
+After Processing:
+export/
+├── reel/
+│   └── Cooley's (Edor).mp3
+├── jig/
+│   └── The Kesh (Gmaj).mp3
+├── polka/
+│   └── Bill Sullivan's (Amaj).mp3
+├── unknown/
+│   └── Random Song.mp3
+└── irish_music.apkg  ← Ready to import!
 ```
 
-This will:
-- Search thesession.org for each mp3 file in the directory using the name of the file (ex. The Banshee.mp3)
-- Extract title, rhythm, and key
-- Copy files to `export/rhythm/Title (Key).mp3` format
-- Move unmatched files to `export/unknown/`
+## 📱 Anki Import
 
-### 3. Generate Anki cards only
+### Desktop Anki
+1. Double-click the generated `.apkg` file, or
+2. File → Import → select the `.apkg` file
+
+### AnkiDroid (Android)
+1. Install AnkiDroid from Google Play Store
+2. Copy the `.apkg` file to your device
+3. Open AnkiDroid → Menu (⋮) → Import
+4. Select the `.apkg` file
+
+### Card Format
+
+**Default Layout**:
+- **Front**: 🎵 Audio file of the tune (tap to play)  
+- **Back**: 🏷️ Name + 🎼 Key + 🎭 Rhythm
+
+**Customizable Options**:
+- **🏷️ Name**: The tune's title (e.g., "Cooley's Reel")
+- **🎵 Audio**: Playable audio file
+- **🎼 Key**: Musical key (e.g., "Edor", "Gmaj")  
+- **🎭 Rhythm**: Type of tune (e.g., "reel", "jig", "polka")
+
+**Suggested Layouts**:
+- **Audio-first** (default): 🎵 → 🏷️🎼🎭
+- **Name-first**: 🏷️ → 🎵🎼🎭  
+- **Key training**: 🎵 → 🎼
+
+## ⚙️ Advanced Usage (Command Line)
+
+For automation or advanced users, the command-line interface is still available:
+
+### Complete Workflow
 ```bash
-python3 irish_anki.py generate-cards <organized_music_directory>
+python irish_anki.py all <input_directory>
 ```
 
-This creates a ready-to-import .apkg file from already organized music files.
-
-### 4. Do everything in one go
+### Individual Steps
 ```bash
-python3 irish_anki.py all <input_directory>
+# 1. Convert audio files to mp3
+python irish_anki.py convert <input_directory>
+
+# 2. Organize files by rhythm
+python irish_anki.py organize <mp3_directory>
+
+# 3. Generate Anki cards
+python irish_anki.py generate-cards <organized_music_directory>
 ```
 
-This combines all steps: convert to mp3, organize the files, then generate a ready-to-import .apkg file.
-
-## Example Workflow
-
+### Custom Options
 ```bash
-# Process your raw audio files (m4a, wav, etc.)
-python3 irish_anki.py all tmp/yt-dlp/
-
-# This will:
-# 1. Convert all audio files to mp3 in mp3_files/
-# 2. Organize mp3s by rhythm in export/
-# 3. Generate irish_music.apkg ready to import!
-
-# Final structure:
-# - mp3_files/Cooley's.mp3, Banshee.mp3, etc.
-# - export/jig/The_Kesh (Gmaj).mp3
-# - export/reel/Cooley's (Edor).mp3
-# - export/polka/Bill_Sullivan's (Amaj).mp3
-# - irish_music.apkg (ready to import!)
+# Custom output locations and deck name
+python irish_anki.py all tmp/music/ \
+  --output my_collection.apkg \
+  --deck-name "My Irish Collection" \
+  --mp3-dir converted/ \
+  --export-dir organized/
 ```
 
-## Command Options
+## 🛠️ Requirements
 
-```bash
-# Convert only
-python3 irish_anki.py convert tmp/yt-dlp/ --output converted_mp3/
+### For GUI Usage
+- **Windows**: Download `IrishAnki.exe` (no requirements!)
+- **Linux/Mac**: Python 3.8+ and packages below
 
-# Organize with custom output directory
-python3 irish_anki.py organize mp3_files/ --output my_music
-
-# Generate .apkg with custom name and deck
-python3 irish_anki.py generate-cards export/ --output my_irish_music.apkg --deck-name "My Collection"
-
-# Full workflow with custom .apkg name
-python3 irish_anki.py all tmp/yt-dlp/ --output my_collection.apkg --deck-name "Traditional Irish"
-```
-
-## Import into Anki
-
-Just double-click the generated `.apkg` file, or:
-
-1. **Desktop Anki**: File > Import > select the `.apkg` file
-2. **AnkiDroid**: Import the `.apkg` file directly
-
-Everything is included - no manual setup needed!
-
-The cards will have:
-- **Front**: Audio file of the tune (click to play)  
-- **Back**: Rhythm, key, and title
-
-
-## AnkiDroid
-
-To use these cards on your Android device:
-
-1. Install AnkiDroid from the Google Play Store
-2. Copy the generated `.apkg` file to your device
-3. Open AnkiDroid and tap the three dots menu
-4. Select "Import" and navigate to the `.apkg` file
-5. The deck will be imported with all audio files included
-
-## Requirements
-
-- Python 3.6+
-- Python packages:
-  - `requests`
-  - `beautifulsoup4` 
-  - `genanki` (for .apkg generation)
-- [ffmpeg](https://ffmpeg.org/download.html) for audio conversion
-- [Anki](https://apps.ankiweb.net/) for importing cards
-
-Install dependencies:
+### Python Dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-## File Organization
+Required packages:
+- `requests` - Web scraping thesession.org
+- `beautifulsoup4` - HTML parsing  
+- `genanki` - Anki deck generation
 
-The script works with various audio formats (m4a, wav, flac, aac, ogg, mp4, webm) and will:
+### External Dependencies
+- **[ffmpeg](https://ffmpeg.org/download.html)** - Audio conversion
+- **[Anki](https://apps.ankiweb.net/)** - For importing cards
 
-1. **Convert** audio files to mp3 format using ffmpeg
-2. **Search** thesession.org for each tune
-3. **Extract** metadata (title, rhythm, key) from ABC notation
-4. **Organize** files as: `rhythm/Title (Key).mp3`
-5. **Generate** Anki cards with clean filenames
+## 🎼 File Organization Strategy
+
+The tool intelligently organizes your music:
+
+1. **🔍 Search**: Queries thesession.org using filename
+2. **🎵 Extract**: Parses ABC notation for metadata
+3. **📁 Organize**: Files become `rhythm/Title (Key).mp3`
+4. **❓ Unknown**: Unmatched files go to `unknown/` for manual review
+
+**Supported Formats**: m4a, wav, flac, aac, ogg, mp4, webm → mp3
+
+## 🐛 Troubleshooting
+
+**GUI won't start**: Ensure Python 3.8+ and run `pip install -r requirements.txt`
+
+**Audio conversion fails**: Install [ffmpeg](https://ffmpeg.org/download.html) and ensure it's in PATH
+
+**No tunes found**: Check your filenames match Irish traditional tune names
+
+**Large .apkg files**: This is normal - audio files are embedded for offline use
 
 Files that can't be matched are copied to the `unknown` directory for manual review.
 
