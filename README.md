@@ -131,3 +131,16 @@ The script works with various audio formats (m4a, wav, flac, aac, ogg, mp4, webm
 5. **Generate** Anki cards with clean filenames
 
 Files that can't be matched are copied to the `unknown` directory for manual review.
+
+Recognized rhythms are : 
+- reel
+- jig
+- slide
+- slipjig
+- polka
+- waltz
+- hornpipe
+- barndance
+- marzuka
+- strathspey
+- march
