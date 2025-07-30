@@ -5,7 +5,7 @@ This tool generates Anki flashcards from Irish traditional music files. It uses 
 **Note**: This tool does not provide music files - you must bring your own legally obtained Irish traditional music collection, for example by ["ripping your own albums"](https://github.com/makuguren/Spotify-Playlist-Downloader) or ["recording yourself"](https://github.com/yt-dlp/yt-dlp).
 
 
-![Irish Anki GUI](screenshot.jpg)
+![Irish Anki GUI](screenshot.png)
 
 - **Audio conversion** from various formats (m4a, wav, flac, aac, ogg, mp4, webm) to mp3 using ffmpeg
 - **Respectful web scraping** of thesession.org with appropriate delays
