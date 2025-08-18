@@ -12,6 +12,7 @@ from typing import List, Tuple
 import requests
 from bs4 import BeautifulSoup
 import genanki
+from locale_manager import _
 
 
 def respectful_delay():
@@ -24,7 +25,7 @@ def convert_to_mp3(input_dir, output_dir="mp3_files"):
     output_path = Path(output_dir)
     
     if not input_path.exists():
-        print(f"Error: Input directory '{input_dir}' does not exist")
+        print(_("cli.error.input_directory_not_exist", input_dir=input_dir))
         return False
     
     output_path.mkdir(exist_ok=True)
@@ -41,14 +42,14 @@ def convert_to_mp3(input_dir, output_dir="mp3_files"):
     
     # If no files to convert and no MP3s, return error
     if not audio_files and not mp3_files:
-        print(f"No audio files found in '{input_dir}'")
-        print(f"Supported formats: .mp3, {', '.join(audio_extensions)}")
+        print(_("cli.error.no_audio_files", input_dir=input_dir))
+        print(_("cli.info.supported_formats", extensions=', '.join(audio_extensions)))
         return False
     
     # If input and output are the same directory and we have MP3s, no work needed
     if input_path.resolve() == output_path.resolve() and mp3_files:
-        print(f"Input directory already contains {len(mp3_files)} MP3 files")
-        print(f"No conversion or copying needed (input and output are the same)")
+        print(_("cli.info.input_contains_mp3", count=len(mp3_files)))
+        print(_("cli.info.no_conversion_needed"))
         return True
     
     # Check if ffmpeg is available (only if we have files to convert)
@@ -56,10 +57,10 @@ def convert_to_mp3(input_dir, output_dir="mp3_files"):
         try:
             subprocess.run(['ffmpeg', '-version'], capture_output=True, check=True)
         except (subprocess.CalledProcessError, FileNotFoundError):
-            print("Error: ffmpeg is not installed or not in PATH")
-            print("Please install ffmpeg: https://ffmpeg.org/download.html")
+            print(_("cli.error.ffmpeg_not_installed"))
+            print(_("cli.error.ffmpeg_install_help"))
             if mp3_files:
-                print(f"Note: Found {len(mp3_files)} MP3 files that could be copied instead")
+                print(_("cli.info.note_mp3_files", count=len(mp3_files)))
             return False
     
     converted = 0
@@ -131,16 +132,16 @@ def convert_to_mp3(input_dir, output_dir="mp3_files"):
                 print(f"  ✗ Error copying {mp3_file.name}: {e}")
                 failed += 1
     
-    print(f"\nOperation complete!")
+    print(f"\n{_('cli.info.operation_complete')}")
     if converted > 0:
-        print(f"  Converted: {converted}")
+        print(_("cli.info.converted", count=converted))
     if copied > 0:
-        print(f"  Copied: {copied}")
+        print(_("cli.info.copied", count=copied))
     if skipped > 0:
-        print(f"  Skipped: {skipped}")
+        print(_("cli.info.skipped", count=skipped))
     if failed > 0:
-        print(f"  Failed: {failed}")
-    print(f"MP3 files are in: {output_dir}")
+        print(_("cli.info.failed", count=failed))
+    print(_("cli.info.mp3_files_location", output_dir=output_dir))
     
     return (converted + copied) > 0
 
@@ -151,7 +152,7 @@ def search_tune_on_thesession(tune_name):
     search_url = f"https://thesession.org/tunes/search?type=&mode=&q={quote_plus(tune_name)}"
     
     try:
-        response = requests.get(search_url, timeout=10)
+        response = requests.get(search_url, timeout=30)
         response.raise_for_status()
         
         soup = BeautifulSoup(response.content, 'html.parser')
@@ -167,7 +168,7 @@ def search_tune_on_thesession(tune_name):
             print(f"  No results for '{tune_name}', trying 'The {tune_name}'")
             search_url_with_the = f"https://thesession.org/tunes/search?type=&mode=&q={quote_plus('The ' + tune_name)}"
             
-            response = requests.get(search_url_with_the, timeout=10)
+            response = requests.get(search_url_with_the, timeout=30)
             response.raise_for_status()
             
             soup = BeautifulSoup(response.content, 'html.parser')
@@ -186,7 +187,7 @@ def search_tune_on_thesession(tune_name):
 def extract_abc_metadata(tune_url):
     """Extract T:, R:, K: metadata from the ABC notation on a tune page"""
     try:
-        response = requests.get(tune_url, timeout=10)
+        response = requests.get(tune_url, timeout=30)
         response.raise_for_status()
         
         soup = BeautifulSoup(response.content, 'html.parser')
@@ -248,7 +249,7 @@ def organize_music_files(input_dir, export_dir="export"):
     """Organize mp3 files by crawling thesession.org for metadata"""
     input_path = Path(input_dir)
     if not input_path.exists():
-        print(f"Error: Directory '{input_dir}' does not exist")
+        print(_("cli.error.directory_not_exist", input_dir=input_dir))
         return False
     
     export_path = Path(export_dir)
@@ -259,11 +260,11 @@ def organize_music_files(input_dir, export_dir="export"):
     
     mp3_files = list(input_path.glob("*.mp3"))
     if not mp3_files:
-        print(f"No mp3 files found in '{input_dir}'")
+        print(_("cli.error.no_audio_files", input_dir=input_dir))
         return False
     
-    print(f"Found {len(mp3_files)} mp3 files to process")
-    print("Starting processing with respectful delays...")
+    print(_("cli.info.found_mp3_process", count=len(mp3_files)))
+    print(_("cli.info.starting_processing"))
     
     processed = []
     unknown_files = []
@@ -424,7 +425,7 @@ def generate_apkg(music_dir, output_file="irish_music.apkg", deck_name="Irish Tr
     music_path = Path(music_dir)
     
     if not music_path.exists():
-        print(f"Error: Music directory '{music_dir}' not found!")
+        print(_("cli.error.music_directory_not_found", music_dir=music_dir))
         return False
     
     # Default layout if none provided
@@ -434,11 +435,11 @@ def generate_apkg(music_dir, output_file="irish_music.apkg", deck_name="Irish Tr
             'back': {'name': True, 'audio': False, 'key': True, 'rhythm': True}
         }
     
-    print("Processing music directory for .apkg generation...")
+    print(_("cli.info.processing_music_directory"))
     cards = process_music_directory(music_path)
     
     if not cards:
-        print("No valid music files found!")
+        print(_("cli.info.no_valid_music_files"))
         return False
     
     # Randomize the cards if requested

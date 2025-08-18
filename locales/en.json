@@ -1,0 +1,175 @@
+{
+  "gui": {
+    "title": "Irish Traditional Music to Anki Cards Generator",
+    "workflow": {
+      "title": "📖 How it works (click to expand)",
+      "title_collapsed": "📖 How it works (click to collapse)",
+      "description": "Workflow: Audio Files → MP3 → Organized by Rhythm → Anki Deck\n\n1. 🎵 PROCESS: Converts audio formats (.m4a, .wav, .flac, etc.) to MP3 or copies existing MP3s\n2. 🗂️  ORGANIZE: Searches thesession.org for metadata and organizes by rhythm  \n3. 🎴 GENERATE: Creates Anki .apkg file with audio cards\n\n💡 You can run steps individually or use 'Run All Steps' for the complete workflow"
+    },
+    "button": {
+      "browse": "Browse",
+      "process_audio": "Process Audio",
+      "organize_files": "Organize Files",
+      "generate_cards": "Generate Cards",
+      "run_all": "🎯 Run All Steps",
+      "clear_console": "Clear Console",
+      "up": "Up",
+      "refresh": "Refresh",
+      "cancel": "Cancel",
+      "choose_directory": "Choose This Directory"
+    },
+    "label": {
+      "input_directory": "Input Directory:",
+      "mp3_directory": "MP3 Directory:",
+      "export_directory": "Export Directory:",
+      "output_file": "Output .apkg File:",
+      "deck_name": "Deck Name:",
+      "language": "Language:",
+      "current_directory": "Current Directory:",
+      "name": "Name",
+      "type": "Type",
+      "size": "Size"
+    },
+    "section": {
+      "directories_files": "📁 Directories and Files",
+      "options": "⚙️ Options",
+      "card_layout": "🎴 Card Layout",
+      "actions": "🚀 Actions",
+      "status": "📊 Status",
+      "console_output": "Console Output",
+      "front_side": "Front Side",
+      "back_side": "Back Side"
+    },
+    "checkbox": {
+      "randomize_cards": "Randomize Cards",
+      "name": "🏷️ Name",
+      "audio": "🎵 Audio",
+      "key": "🎼 Key",
+      "rhythm": "🎭 Rhythm"
+    },
+    "card_layout": {
+      "instruction": "Choose what appears on the front and back of your Anki cards:",
+      "preview": "💡 Default: 🎵 Audio on front, 🏷️ Name + 🎼 Key + 🎭 Rhythm on back"
+    },
+    "status": {
+      "ready": "Ready",
+      "starting_conversion": "Starting conversion...",
+      "starting_organization": "Starting organization...",
+      "starting_generation": "Starting card generation...",
+      "starting_full_process": "Starting full process...",
+      "step1_processing": "Step 1: Processing audio files...",
+      "step2_organizing": "Step 2: Organizing music files...",
+      "step3_generating": "Step 3: Generating Anki cards...",
+      "processing_completed": "Processing completed!",
+      "organization_completed": "Organization completed!",
+      "generation_completed": "Cards generated!",
+      "all_completed": "All steps completed!",
+      "processing_failed": "Processing failed",
+      "organization_failed": "Organization failed",
+      "generation_failed": "Card generation failed",
+      "validation_failed": "Validation failed",
+      "directory_not_found": "Directory not found",
+      "error_occurred": "Error occurred"
+    },
+    "dialog": {
+      "select_input_directory": "Select Input Directory with Audio Files",
+      "save_anki_deck": "Save Anki Deck As",
+      "select_directory": "Select Directory"
+    },
+    "console": {
+      "help_text": "Console output will appear here...\n\n💡 Quick Start:\n1. Select your Input Directory with audio files\n2. Click 'Run All Steps' for the complete workflow\n3. Import the generated .apkg file into Anki\n"
+    },
+    "file_types": {
+      "folder": "📁 Folder",
+      "audio": "🎵 Audio",
+      "file": "📄 File",
+      "error": "Error",
+      "permission_denied": "[Permission Denied]"
+    }
+  },
+  "cli": {
+    "error": {
+      "input_directory_not_exist": "Error: Input directory '{input_dir}' does not exist",
+      "no_audio_files": "No audio files found in '{input_dir}'",
+      "ffmpeg_not_installed": "Error: ffmpeg is not installed or not in PATH",
+      "ffmpeg_install_help": "Please install ffmpeg: https://ffmpeg.org/download.html",
+      "directory_not_exist": "Error: Directory '{input_dir}' does not exist",
+      "music_directory_not_found": "Error: Music directory '{music_dir}' not found!",
+      "search_error": "Error searching for '{tune_name}': {error}",
+      "abc_metadata_error": "Error extracting ABC metadata from {tune_url}: {error}",
+      "gui_dependencies_missing": "Error: GUI dependencies not installed. Please run: pip install dearpygui"
+    },
+    "info": {
+      "supported_formats": "Supported formats: .mp3, {extensions}",
+      "input_contains_mp3": "Input directory already contains {count} MP3 files",
+      "no_conversion_needed": "No conversion or copying needed (input and output are the same)",
+      "note_mp3_files": "Note: Found {count} MP3 files that could be copied instead",
+      "found_audio_files": "Found {count} audio files to convert",
+      "found_mp3_files_copy": "Found {count} existing MP3 files to copy",
+      "found_mp3_files_output": "Found {count} MP3 files to copy to output directory",
+      "operation_complete": "Operation complete!",
+      "converted": "  Converted: {count}",
+      "copied": "  Copied: {count}",
+      "skipped": "  Skipped: {count}",
+      "failed": "  Failed: {count}",
+      "mp3_files_location": "MP3 files are in: {output_dir}",
+      "found_mp3_process": "Found {count} mp3 files to process",
+      "starting_processing": "Starting processing with respectful delays...",
+      "no_results_trying_the": "  No results for '{tune_name}', trying 'The {tune_name}'",
+      "no_results_copying_unknown": "  No results found, copying to unknown",
+      "found_url": "  Found: {tune_url}",
+      "could_not_find_abc": "  Could not find ABC notation section",
+      "metadata_extracted": "  Metadata - Title: {title}, Rhythm: {rhythm}, Key: {key}",
+      "incomplete_metadata": "  Could not extract complete metadata (T:{title}, R:{rhythm}, K:{key}), copying to unknown",
+      "copied_to": "  Copied to: {target_path}",
+      "processing_music_directory": "Processing music directory for .apkg generation...",
+      "no_valid_music_files": "No valid music files found!",
+      "found_cards_randomized": "Found {count} cards to generate (randomized order)",
+      "found_cards_original": "Found {count} cards to generate (original order)",
+      "card_layout_info": "Card layout: Front: {front_items} | Back: {back_items}",
+      "generating_apkg": "Generating .apkg file: {output_path}",
+      "generated_apkg": "Generated {output_path} with {count} cards!",
+      "cards_randomized": "Cards have been randomized for varied study sessions!",
+      "ready_to_import": "Ready to import: Just double-click the .apkg file or import in Anki/AnkiDroid",
+      "step1_converting": "Step 1: Converting audio files to mp3...",
+      "step2_organizing": "Step 2: Organizing music files...",
+      "step3_generating": "Step 3: Generating Anki .apkg file...",
+      "organization_failed_skip": "Organization failed, skipping Anki card generation",
+      "conversion_failed_skip": "Conversion failed, skipping remaining steps"
+    },
+    "progress": {
+      "skipping_exists": "[{current}/{total}] Skipping (already exists): {name}",
+      "converting": "[{current}/{total}] Converting: {name}",
+      "copying": "[{current}/{total}] Copying: {name}",
+      "processing_tune": "[{current}/{total}] Processing: {tune_name}",
+      "success_converted": "  ✓ Success: {filename}",
+      "success_copied": "  ✓ Copied: {filename}",
+      "failed_conversion": "  ✗ Failed: {filename}",
+      "failed_copy": "  ✗ Error copying {filename}: {error}",
+      "failed_convert_error": "  ✗ Error converting {filename}: {error}"
+    },
+    "summary": {
+      "organization_summary": "ORGANIZATION SUMMARY",
+      "total_processed": "Total files processed: {count}",
+      "successfully_organized": "Successfully organized: {count}",
+      "moved_to_unknown": "Moved to unknown: {count}",
+      "errors": "Errors: {count}",
+      "successfully_organized_files": "Successfully organized files:",
+      "files_moved_unknown": "Files moved to unknown (not found or incomplete metadata):",
+      "errors_encountered": "Errors encountered:",
+      "organized_file_info": "  {original} -> {rhythm}/{title} ({key}).mp3",
+      "unknown_file": "  {filename}",
+      "error_detail": "  {error}"
+    },
+    "warnings": {
+      "could_not_parse_filename": "Warning: Could not parse filename: {filename}",
+      "debug_abc_text": "  Debug - ABC text found: {abc_text}...",
+      "debug_metadata": "  Debug - T: {title}, R: {rhythm}, K: {key}"
+    }
+  },
+  "common": {
+    "file_operations": {
+      "failed_copy": "Failed to copy {filename}: {error}"
+    }
+  }
+}

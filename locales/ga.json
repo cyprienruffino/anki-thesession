@@ -1,0 +1,101 @@
+{
+  "gui": {
+    "title": "Ceol Traidisiúnta na hÉireann go Gineadóir Cártaí Anki",
+    "workflow": {
+      "title": "📖 Cód ar an t-ábhar (cliceáil chun aghaidh)",
+      "title_collapsed": "📖 Cód ar an t-ábhar (cliceáil chun aghaidh)",
+      "description": "Workflow: Fichéirí audio → MP3 → Ordáithe ag an t-rithm → Cártaí Anki\n\n1. 🎵 TRAITSEÁIL: Seolann an fhoirmáidí audio (.m4a, .wav, .flac, etc.) go MP3 nó copán an MP3 atá ann\n2. 🗂️ ORDÁITHÍO: Seolann an méid-shonraí ar thesession.org agus ordáithíonn sé ag an t-rithm\n3. 🎴 GÉANÁIL: Cruthaíonn an fáil .apkg le cártaí audio"
+    },
+    "button": {
+      "browse": "Brabhsáil",
+      "process_audio": "Traiteáil an fhichéirí audio",
+      "organize_files": "Ordáil an fhichéirí",
+      "generate_cards": "Géanáil an cártaí",
+      "run_all": "🎯 Rinn an gach rith",
+      "clear_console": "Cleár an cónóil",
+      "up": "Suas",
+      "refresh": "Athlíonn",
+      "cancel": "Cealaigh",
+      "choose_directory": "Roghnaigh an réad seo"
+    },
+    "label": {
+      "input_directory": "Réad éagsúla:",
+      "mp3_directory": "Réad MP3:",
+      "export_directory": "Réad éagsúla:",
+      "output_file": "Fáil .apkg éagsúla:",
+      "deck_name": "Ainm an deasc:",
+      "language": "Teanga:",
+      "current_directory": "Réad seo:",
+      "name": "Ainm",
+      "type": "Típ",
+      "size": "Méid"
+    },
+    "section": {
+      "directories_files": "📁 Réadanna agus fhichéirí",
+      "options": "⚙️ Roghanna",
+      "card_layout": "🎴 Leagan an cártaí",
+      "actions": "🚀 Roghanna",
+      "status": "📊 Staús",
+      "console_output": "Cónóil éagsúla",
+      "front_side": "Leagan an fhaisnéis",
+      "back_side": "Leagan an fhaisnéis"
+    },
+    "checkbox": {
+      "randomize_cards": "Dún an cártaí",
+      "name": "🏷️ Ainm",
+      "audio": "🎵 Fuaime",
+      "key": "🎼 Clé",
+      "rhythm": "🎭 Rithm"
+    },
+    "card_layout": {
+      "instruction": "Roghnaigh cad a bhaineann ar an fhaisnéis agus an fhaisnéis ar an cártaí Anki:",
+      "preview": "💡 Déanta: 🎵 Fuaime ar an fhaisnéis, 🏷️ Ainm + 🎼 Clé + 🎭 Rithm ar an fhaisnéis"
+    },
+    "status": {
+      "ready": "Gach rud atá ar an gceart",
+      "starting_conversion": "Déanann tú an t-athrú...",
+      "starting_organization": "Déanann tú an t-ordáil...",
+      "starting_generation": "Déanann tú an t-géanáil...",
+      "starting_full_process": "Déanann tú an t-gach rud...",
+      "step1_processing": "Rith: Déanann tú an t-traiteáil...",
+      "step2_organizing": "Rith: Déanann tú an t-ordáil...",
+      "step3_generating": "Rith: Déanann tú an t-géanáil...",
+      "processing_completed": "Déanann tú an t-traiteáil!",
+      "organization_completed": "Déanann tú an t-ordáil!",
+      "generation_completed": "Déanann tú an t-géanáil!",
+      "all_completed": "Déanann tú an gach rud!",
+      "processing_failed": "Déanann tú an t-traiteáil!",
+      "organization_failed": "Déanann tú an t-ordáil!",
+      "generation_failed": "Déanann tú an t-géanáil!",
+      "validation_failed": "Déanann tú an t-valadáil!",
+      "directory_not_found": "Níl an réad seo agat",
+      "error_occurred": "Tharla"
+    },
+    "dialog": {
+      "select_input_directory": "Roghnaigh an réad éagsúla le fhichéirí audio",
+      "save_anki_deck": "Sábháil an deasc Anki mar",
+      "select_directory": "Roghnaigh an réad seo"
+    },
+    "console": {
+      "help_text": "An cónóil éagsúla atá ann agus ansin...\n\n💡 Déanann tú an rud seo:\n1. Roghnaigh an réad éagsúla le fhichéirí audio\n2. Cliceáil 'Rinn an gach rith' le haghaidh an t-ábhar seo\n3. Imoigh an fáil .apkg atá agat i Anki\n"
+    },
+    "file_types": {
+      "folder": "📁 Réad",
+      "audio": "🎵 Fuaime",
+      "file": "📄 Fáil",
+      "error": "Tharla",
+      "permission_denied": "Tá an t-imreoir agat"
+    }
+  },
+  "cli": {
+    "error": {
+      "input_directory_not_exist": "Tharla: Níl an réad éagsúla '{input_dir}' agat",
+      "no_audio_files": "Níl fhichéirí audio agat in '{input_dir}'"
+    }
+  },
+  "common": {
+    "file_operations": {
+      "failed_copy": "Níorbh fhéidir an fáil {filename} a chóipeáil: {error}"
+    }
+  }
+}

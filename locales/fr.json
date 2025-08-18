@@ -1,0 +1,101 @@
+{
+  "gui": {
+    "title": "Générateur de cartes Anki pour la musique irlandaise",
+    "workflow": {
+      "title": "📖 Mode d'emploi (cliquez pour développer)",
+      "title_collapsed": "📖 Mode d'emploi (cliquez pour réduire)",
+      "description": "Workflow: Fichiers audio → MP3 → Organisé par rythme → Cartes Anki\n\n1. 🎵 TRAITER: Convertit les formats audio (.m4a, .wav, .flac, etc.) en MP3 ou copie les MP3 existants\n2. 🗂️ ORGANISER: Recherche les métadonnées sur thesession.org et les organise par rythme\n3. 🎴 GÉNÉRER: Crée un fichier .apkg avec des cartes audio"
+    },
+    "button": {
+      "browse": "Parcourir",
+      "process_audio": "Traiter les fichiers audio",
+      "organize_files": "Organiser les fichiers",
+      "generate_cards": "Générer les cartes Anki",
+      "run_all": "🎯 Tout lancer",
+      "clear_console": "Effacer la console",
+      "up": "Haut",
+      "refresh": "Actualiser",
+      "cancel": "Annuler",
+      "choose_directory": "Choisir ce répertoire"
+    },
+    "label": {
+      "input_directory": "Répertoire contenant les fichiers audio:",
+      "mp3_directory": "Répertoire MP3:",
+      "export_directory": "Répertoire d'export:",
+      "output_file": "Fichier .apkg de sortie:",
+      "deck_name": "Nom du deck:",
+      "language": "Langue:",
+      "current_directory": "Répertoire actuel:",
+      "name": "Nom",
+      "type": "Type",
+      "size": "Taille"
+    },
+    "section": {
+      "directories_files": "📁 Répertoires et fichiers",
+      "options": "⚙️ Options",
+      "card_layout": "🎴 Configuration des cartes",
+      "actions": "🚀 Actions",
+      "status": "📊 Statut",
+      "console_output": "Sortie de la console",
+      "front_side": "Face avant",
+      "back_side": "Face arrière"
+    },
+    "checkbox": {
+      "randomize_cards": "Mélanger les cartes",
+      "name": "🏷️ Nom",
+      "audio": "🎵 Audio",
+      "key": "🎼 Clé",
+      "rhythm": "🎭 Rythme"
+    },
+    "card_layout": {
+      "instruction": "Choisissez ce qui apparaît sur la face avant et arrière de vos cartes Anki:",
+      "preview": "💡 Défaut: 🎵 Audio sur la face avant, 🏷️ Nom + 🎼 Clé + 🎭 Rythme sur la face arrière"
+    },
+    "status": {
+      "ready": "Prêt",
+      "starting_conversion": "Démarrage de la conversion...",
+      "starting_organization": "Démarrage de l'organisation...",
+      "starting_generation": "Démarrage de la génération de cartes...",
+      "starting_full_process": "Démarrage du processus complet...",
+      "step1_processing": "Étape 1: Traitement des fichiers audio...",
+      "step2_organizing": "Étape 2: Organisation des fichiers musicaux...",
+      "step3_generating": "Étape 3: Génération des cartes Anki...",
+      "processing_completed": "Traitement terminé!",
+      "organization_completed": "Organisation terminée!",
+      "generation_completed": "Cartes générées!",
+      "all_completed": "Toutes les étapes terminées!",
+      "processing_failed": "Traitement échoué",
+      "organization_failed": "Organisation échouée",
+      "generation_failed": "Génération de cartes échouée",
+      "validation_failed": "Validation échouée",
+      "directory_not_found": "Répertoire non trouvé",
+      "error_occurred": "Erreur"
+    },
+    "dialog": {
+      "select_input_directory": "Sélectionner le répertoire contenant les fichiers audio",
+      "save_anki_deck": "Enregistrer le deck Anki sous",
+      "select_directory": "Sélectionner un répertoire"
+    },
+    "console": {
+      "help_text": "La sortie de la console apparaîtra ici...\n\n💡 Démarrage rapide:\n1. Sélectionnez votre répertoire contenant les fichiers audio\n2. Cliquez sur 'Tout lancer' pour le processus complet\n3. Importez le fichier .apkg généré dans Anki\n"
+    },
+    "file_types": {
+      "folder": "📁 Dossier",
+      "audio": "🎵 Audio",
+      "file": "📄 Fichier",
+      "error": "Erreur",
+      "permission_denied": "Permission refusée"
+    }
+  },
+  "cli": {
+    "error": {
+      "input_directory_not_exist": "Erreur: Le répertoire '{input_dir}' n'existe pas",
+      "no_audio_files": "Aucun fichier audio trouvé dans '{input_dir}'"
+    }
+  },
+  "common": {
+    "file_operations": {
+      "failed_copy": "Échec de la copie de {filename}: {error}"
+    }
+  }
+}

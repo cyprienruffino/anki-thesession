@@ -10,10 +10,13 @@ from pathlib import Path
 from io import StringIO
 
 from irish_anki import convert_to_mp3, organize_music_files, generate_anki_cards
+from locale_manager import _, get_available_languages, set_language, get_current_language
 
 
 class DirectoryPickerDialog:
-    def __init__(self, parent, title="Select Directory", initial_dir=None):
+    def __init__(self, parent, title=None, initial_dir=None):
+        if title is None:
+            title = _("gui.dialog.select_directory")
         self.result = None
         self.current_path = initial_dir or str(Path.home())
         
@@ -40,7 +43,7 @@ class DirectoryPickerDialog:
         path_frame = ttk.Frame(main_frame)
         path_frame.pack(fill="x", pady=(0, 10))
         
-        ttk.Label(path_frame, text="Current Directory:").pack(side="left")
+        ttk.Label(path_frame, text=_("gui.label.current_directory")).pack(side="left")
         self.path_var = tk.StringVar(value=self.current_path)
         path_entry = ttk.Entry(path_frame, textvariable=self.path_var, state="readonly")
         path_entry.pack(side="left", fill="x", expand=True, padx=(10, 0))
@@ -63,9 +66,9 @@ class DirectoryPickerDialog:
         self.tree.column("type", width=80, minwidth=50)
         self.tree.column("size", width=100, minwidth=70)
         
-        self.tree.heading("#0", text="Name", anchor="w")
-        self.tree.heading("type", text="Type", anchor="w")
-        self.tree.heading("size", text="Size", anchor="w")
+        self.tree.heading("#0", text=_("gui.label.name"), anchor="w")
+        self.tree.heading("type", text=_("gui.label.type"), anchor="w")
+        self.tree.heading("size", text=_("gui.label.size"), anchor="w")
         
         # Bind double-click to navigate
         self.tree.bind("<Double-1>", self.on_double_click)
@@ -74,11 +77,11 @@ class DirectoryPickerDialog:
         button_frame = ttk.Frame(main_frame)
         button_frame.pack(fill="x")
         
-        ttk.Button(button_frame, text="Up", command=self.go_up).pack(side="left", padx=(0, 5))
-        ttk.Button(button_frame, text="Refresh", command=self.refresh_contents).pack(side="left", padx=(0, 20))
+        ttk.Button(button_frame, text=_("gui.button.up"), command=self.go_up).pack(side="left", padx=(0, 5))
+        ttk.Button(button_frame, text=_("gui.button.refresh"), command=self.refresh_contents).pack(side="left", padx=(0, 20))
         
-        ttk.Button(button_frame, text="Cancel", command=self.cancel).pack(side="right")
-        ttk.Button(button_frame, text="Choose This Directory", command=self.choose_directory).pack(side="right", padx=(0, 10))
+        ttk.Button(button_frame, text=_("gui.button.cancel"), command=self.cancel).pack(side="right")
+        ttk.Button(button_frame, text=_("gui.button.choose_directory"), command=self.choose_directory).pack(side="right", padx=(0, 10))
         
     def refresh_contents(self):
         # Clear existing items
@@ -93,7 +96,7 @@ class DirectoryPickerDialog:
             for item in os.listdir(self.current_path):
                 item_path = os.path.join(self.current_path, item)
                 if os.path.isdir(item_path):
-                    items.append((item, "📁 Folder", "", True))
+                    items.append((item, _("gui.file_types.folder"), "", True))
                 else:
                     # Show file size
                     try:
@@ -110,9 +113,9 @@ class DirectoryPickerDialog:
                     # Determine file type
                     ext = os.path.splitext(item)[1].lower()
                     if ext in ['.mp3', '.m4a', '.wav', '.flac', '.aac', '.ogg']:
-                        file_type = "🎵 Audio"
+                        file_type = _("gui.file_types.audio")
                     else:
-                        file_type = "📄 File"
+                        file_type = _("gui.file_types.file")
                     
                     items.append((item, file_type, size_str, False))
             
@@ -129,10 +132,10 @@ class DirectoryPickerDialog:
             self.tree.tag_configure("file", foreground="black")
                 
         except PermissionError:
-            self.tree.insert("", "end", text="[Permission Denied]", values=("Error", ""), tags=("error",))
+            self.tree.insert("", "end", text=_("gui.file_types.permission_denied"), values=(_("gui.file_types.error"), ""), tags=("error",))
             self.tree.tag_configure("error", foreground="red")
         except Exception as e:
-            self.tree.insert("", "end", text=f"[Error: {e}]", values=("Error", ""), tags=("error",))
+            self.tree.insert("", "end", text=f"[Error: {e}]", values=(_("gui.file_types.error"), ""), tags=("error",))
             
     def on_double_click(self, event):
         selection = self.tree.selection()
@@ -192,7 +195,7 @@ class IrishAnkiGUI:
         
         # Create main window
         self.root = tk.Tk()
-        self.root.title("Irish Anki - Traditional Music to Anki Cards")
+        self.root.title(_("gui.title"))
         self.root.geometry("950x850")
         self.root.minsize(800, 700)
         
@@ -207,6 +210,7 @@ class IrishAnkiGUI:
         self.output_file = tk.StringVar(value="irish_music.apkg")
         self.deck_name = tk.StringVar(value="Irish Traditional Music")
         self.randomize_cards = tk.BooleanVar(value=True)
+        self.current_language = tk.StringVar(value=get_current_language())
         
         # Card layout customization variables
         self.front_name = tk.BooleanVar(value=False)
@@ -220,6 +224,67 @@ class IrishAnkiGUI:
         self.back_rhythm = tk.BooleanVar(value=True)
         
         self.setup_gui()
+        
+    def change_language(self, *args):
+        """Handle language change event"""
+        new_language = self.current_language.get()
+        if set_language(new_language):
+            # Rebuild the interface with new language
+            self.rebuild_interface()
+    
+    def rebuild_interface(self):
+        """Rebuild the entire interface with new language strings"""
+        # Store current values
+        current_values = {
+            'input_dir': self.input_dir.get(),
+            'mp3_dir': self.mp3_dir.get(),
+            'export_dir': self.export_dir.get(),
+            'output_file': self.output_file.get(),
+            'deck_name': self.deck_name.get(),
+            'randomize_cards': self.randomize_cards.get(),
+            'front_name': self.front_name.get(),
+            'front_audio': self.front_audio.get(),
+            'front_key': self.front_key.get(),
+            'front_rhythm': self.front_rhythm.get(),
+            'back_name': self.back_name.get(),
+            'back_audio': self.back_audio.get(),
+            'back_key': self.back_key.get(),
+            'back_rhythm': self.back_rhythm.get(),
+        }
+        
+        # Clear the main window
+        for widget in self.root.winfo_children():
+            widget.destroy()
+        
+        # Update window title
+        self.root.title(_("gui.title"))
+        
+        # Restore grid configuration
+        self.root.grid_rowconfigure(0, weight=1)
+        self.root.grid_columnconfigure(0, weight=1)
+        
+        # Rebuild the GUI
+        self.setup_gui()
+        
+        # Restore the values
+        self.input_dir.set(current_values['input_dir'])
+        self.mp3_dir.set(current_values['mp3_dir'])
+        self.export_dir.set(current_values['export_dir'])
+        self.output_file.set(current_values['output_file'])
+        self.deck_name.set(current_values['deck_name'])
+        self.randomize_cards.set(current_values['randomize_cards'])
+        self.front_name.set(current_values['front_name'])
+        self.front_audio.set(current_values['front_audio'])
+        self.front_key.set(current_values['front_key'])
+        self.front_rhythm.set(current_values['front_rhythm'])
+        self.back_name.set(current_values['back_name'])
+        self.back_audio.set(current_values['back_audio'])
+        self.back_key.set(current_values['back_key'])
+        self.back_rhythm.set(current_values['back_rhythm'])
+        
+        # Re-bind language change event (since the combobox was recreated)
+        # Note: The combobox is now created in create_workflow_section
+        self.language_combo.bind('<<ComboboxSelected>>', self.change_language)
         
     def setup_gui(self):
         # Create a canvas and scrollbar for the main content
@@ -247,7 +312,7 @@ class IrishAnkiGUI:
         main_frame.grid_columnconfigure(0, weight=1)
         
         # Title
-        title_label = ttk.Label(main_frame, text="Irish Traditional Music to Anki Cards Generator", 
+        title_label = ttk.Label(main_frame, text=_("gui.title"), 
                                font=("", 16, "bold"))
         title_label.grid(row=0, column=0, pady=(0, 10), sticky="w")
         
@@ -283,22 +348,42 @@ class IrishAnkiGUI:
         container.grid(row=row, column=0, sticky="ew", pady=(0, 10))
         container.grid_columnconfigure(0, weight=1)
         
+        # Top frame for workflow button and language selector
+        top_frame = ttk.Frame(container)
+        top_frame.grid(row=0, column=0, sticky="ew")
+        top_frame.grid_columnconfigure(0, weight=1)
+        
         # Toggle button for collapsible section
         self.workflow_visible = tk.BooleanVar(value=False)  # Collapsed by default
         
         def toggle_workflow():
             if self.workflow_visible.get():
                 workflow_content.grid_remove()
-                toggle_btn.config(text="📖 How it works (click to expand)")
+                toggle_btn.config(text=_("gui.workflow.title"))
                 self.workflow_visible.set(False)
             else:
                 workflow_content.grid()
-                toggle_btn.config(text="📖 How it works (click to collapse)")
+                toggle_btn.config(text=_("gui.workflow.title_collapsed"))
                 self.workflow_visible.set(True)
         
-        toggle_btn = ttk.Button(container, text="📖 How it works (click to expand)", 
+        toggle_btn = ttk.Button(top_frame, text=_("gui.workflow.title"), 
                                command=toggle_workflow)
         toggle_btn.grid(row=0, column=0, sticky="w")
+        
+        # Language selector on the right side
+        language_frame = ttk.Frame(top_frame)
+        language_frame.grid(row=0, column=1, sticky="e", padx=(20, 0))
+        
+        ttk.Label(language_frame, text=_("gui.label.language")).grid(row=0, column=0, sticky="w", padx=(0, 5))
+        
+        # Get available languages and create combobox
+        available_langs = get_available_languages()
+        language_values = list(available_langs.keys())
+        
+        self.language_combo = ttk.Combobox(language_frame, textvariable=self.current_language, 
+                                          values=language_values, state="readonly", width=12)
+        self.language_combo.grid(row=0, column=1, sticky="w")
+        self.language_combo.bind('<<ComboboxSelected>>', self.change_language)
         
         # Content frame (hidden by default)
         workflow_content = ttk.LabelFrame(container, text="", padding="10")
@@ -306,100 +391,96 @@ class IrishAnkiGUI:
         workflow_content.grid_columnconfigure(0, weight=1)
         workflow_content.grid_remove()  # Hide by default
         
-        workflow_text = """Workflow: Audio Files → MP3 → Organized by Rhythm → Anki Deck
-
-1. 🎵 PROCESS: Converts audio formats (.m4a, .wav, .flac, etc.) to MP3 or copies existing MP3s
-2. 🗂️  ORGANIZE: Searches thesession.org for metadata and organizes by rhythm  
-3. 🎴 GENERATE: Creates Anki .apkg file with audio cards
-
-💡 You can run steps individually or use 'Run All Steps' for the complete workflow"""
+        workflow_text = _("gui.workflow.description")
         
         workflow_label = ttk.Label(workflow_content, text=workflow_text, justify="left")
         workflow_label.grid(row=0, column=0, sticky="w")
         
     def create_io_section(self, parent, row):
-        io_frame = ttk.LabelFrame(parent, text="📁 Directories and Files", padding="10")
+        io_frame = ttk.LabelFrame(parent, text=_("gui.section.directories_files"), padding="10")
         io_frame.grid(row=row, column=0, sticky="ew", pady=(0, 10))
         io_frame.grid_columnconfigure(1, weight=1)
         
         # Input Directory
-        ttk.Label(io_frame, text="Input Directory:").grid(row=0, column=0, sticky="w", pady=2)
+        ttk.Label(io_frame, text=_("gui.label.input_directory")).grid(row=0, column=0, sticky="w", pady=2)
         input_frame = ttk.Frame(io_frame)
         input_frame.grid(row=0, column=1, sticky="ew", padx=(10, 0))
         input_frame.grid_columnconfigure(0, weight=1)
         
         input_entry = ttk.Entry(input_frame, textvariable=self.input_dir, width=50)
         input_entry.grid(row=0, column=0, sticky="ew")
-        ttk.Button(input_frame, text="Browse", 
+        ttk.Button(input_frame, text=_("gui.button.browse"), 
                   command=self.select_input_directory).grid(row=0, column=1, padx=(5, 0))
         
         # MP3 Directory
-        ttk.Label(io_frame, text="MP3 Directory:").grid(row=1, column=0, sticky="w", pady=2)
+        ttk.Label(io_frame, text=_("gui.label.mp3_directory")).grid(row=1, column=0, sticky="w", pady=2)
         ttk.Entry(io_frame, textvariable=self.mp3_dir, width=60).grid(row=1, column=1, sticky="ew", padx=(10, 0))
         
         # Export Directory
-        ttk.Label(io_frame, text="Export Directory:").grid(row=2, column=0, sticky="w", pady=2)
+        ttk.Label(io_frame, text=_("gui.label.export_directory")).grid(row=2, column=0, sticky="w", pady=2)
         ttk.Entry(io_frame, textvariable=self.export_dir, width=60).grid(row=2, column=1, sticky="ew", padx=(10, 0))
         
         # Output File
-        ttk.Label(io_frame, text="Output .apkg File:").grid(row=3, column=0, sticky="w", pady=2)
+        ttk.Label(io_frame, text=_("gui.label.output_file")).grid(row=3, column=0, sticky="w", pady=2)
         output_frame = ttk.Frame(io_frame)
         output_frame.grid(row=3, column=1, sticky="ew", padx=(10, 0))
         output_frame.grid_columnconfigure(0, weight=1)
         
         output_entry = ttk.Entry(output_frame, textvariable=self.output_file, width=50)
         output_entry.grid(row=0, column=0, sticky="ew")
-        ttk.Button(output_frame, text="Browse", 
+        ttk.Button(output_frame, text=_("gui.button.browse"), 
                   command=self.select_output_file).grid(row=0, column=1, padx=(5, 0))
         
     def create_options_section(self, parent, row):
-        options_frame = ttk.LabelFrame(parent, text="⚙️ Options", padding="10")
+        options_frame = ttk.LabelFrame(parent, text=_("gui.section.options"), padding="10")
         options_frame.grid(row=row, column=0, sticky="ew", pady=(0, 10))
         options_frame.grid_columnconfigure(1, weight=1)
         
-        ttk.Label(options_frame, text="Deck Name:").grid(row=0, column=0, sticky="w", pady=2)
+        # Deck name
+        ttk.Label(options_frame, text=_("gui.label.deck_name")).grid(row=0, column=0, sticky="w", pady=2)
         ttk.Entry(options_frame, textvariable=self.deck_name, width=60).grid(row=0, column=1, sticky="ew", padx=(10, 0))
         
-        ttk.Checkbutton(options_frame, text="Randomize Cards", 
+        # Randomize cards checkbox
+        ttk.Checkbutton(options_frame, text=_("gui.checkbox.randomize_cards"), 
                        variable=self.randomize_cards).grid(row=1, column=0, columnspan=2, sticky="w", pady=5)
         
     def create_card_layout_section(self, parent, row):
         """Create the card layout customization section"""
-        layout_frame = ttk.LabelFrame(parent, text="🎴 Card Layout", padding="10")
+        layout_frame = ttk.LabelFrame(parent, text=_("gui.section.card_layout"), padding="10")
         layout_frame.grid(row=row, column=0, sticky="ew", pady=(0, 10))
         layout_frame.grid_columnconfigure(0, weight=1)
         layout_frame.grid_columnconfigure(1, weight=1)
         
         # Instructions
         instructions = ttk.Label(layout_frame, 
-                                text="Choose what appears on the front and back of your Anki cards:",
+                                text=_("gui.card_layout.instruction"),
                                 font=("", 9))
         instructions.grid(row=0, column=0, columnspan=2, sticky="w", pady=(0, 10))
         
         # Front side
-        front_frame = ttk.LabelFrame(layout_frame, text="Front Side", padding="10")
+        front_frame = ttk.LabelFrame(layout_frame, text=_("gui.section.front_side"), padding="10")
         front_frame.grid(row=1, column=0, sticky="nsew", padx=(0, 5))
         
-        ttk.Checkbutton(front_frame, text="🏷️ Name", 
+        ttk.Checkbutton(front_frame, text=_("gui.checkbox.name"), 
                        variable=self.front_name).pack(anchor="w", pady=2)
-        ttk.Checkbutton(front_frame, text="🎵 Audio", 
+        ttk.Checkbutton(front_frame, text=_("gui.checkbox.audio"), 
                        variable=self.front_audio).pack(anchor="w", pady=2)
-        ttk.Checkbutton(front_frame, text="🎼 Key", 
+        ttk.Checkbutton(front_frame, text=_("gui.checkbox.key"), 
                        variable=self.front_key).pack(anchor="w", pady=2)
-        ttk.Checkbutton(front_frame, text="🎭 Rhythm", 
+        ttk.Checkbutton(front_frame, text=_("gui.checkbox.rhythm"), 
                        variable=self.front_rhythm).pack(anchor="w", pady=2)
         
         # Back side
-        back_frame = ttk.LabelFrame(layout_frame, text="Back Side", padding="10")
+        back_frame = ttk.LabelFrame(layout_frame, text=_("gui.section.back_side"), padding="10")
         back_frame.grid(row=1, column=1, sticky="nsew", padx=(5, 0))
         
-        ttk.Checkbutton(back_frame, text="🏷️ Name", 
+        ttk.Checkbutton(back_frame, text=_("gui.checkbox.name"), 
                        variable=self.back_name).pack(anchor="w", pady=2)
-        ttk.Checkbutton(back_frame, text="🎵 Audio", 
+        ttk.Checkbutton(back_frame, text=_("gui.checkbox.audio"), 
                        variable=self.back_audio).pack(anchor="w", pady=2)
-        ttk.Checkbutton(back_frame, text="🎼 Key", 
+        ttk.Checkbutton(back_frame, text=_("gui.checkbox.key"), 
                        variable=self.back_key).pack(anchor="w", pady=2)
-        ttk.Checkbutton(back_frame, text="🎭 Rhythm", 
+        ttk.Checkbutton(back_frame, text=_("gui.checkbox.rhythm"), 
                        variable=self.back_rhythm).pack(anchor="w", pady=2)
         
         # Validation function to ensure at least one item is selected on front
@@ -415,48 +496,48 @@ class IrishAnkiGUI:
         
         # Preview text
         preview_label = ttk.Label(layout_frame, 
-                                 text="💡 Default: 🎵 Audio on front, 🏷️ Name + 🎼 Key + 🎭 Rhythm on back",
+                                 text=_("gui.card_layout.preview"),
                                  font=("", 8), foreground="gray")
         preview_label.grid(row=2, column=0, columnspan=2, sticky="w", pady=(10, 0))
         
     def create_actions_section(self, parent, row):
-        actions_frame = ttk.LabelFrame(parent, text="🚀 Actions", padding="10")
+        actions_frame = ttk.LabelFrame(parent, text=_("gui.section.actions"), padding="10")
         actions_frame.grid(row=row, column=0, sticky="ew", pady=(0, 10))
         
         # Individual step buttons
         step_frame = ttk.Frame(actions_frame)
         step_frame.grid(row=0, column=0, sticky="ew")
         
-        self.convert_btn = ttk.Button(step_frame, text="Process Audio", 
+        self.convert_btn = ttk.Button(step_frame, text=_("gui.button.process_audio"), 
                                      command=self.run_convert, width=15)
         self.convert_btn.grid(row=0, column=0, padx=(0, 5))
         
-        self.organize_btn = ttk.Button(step_frame, text="Organize Files", 
+        self.organize_btn = ttk.Button(step_frame, text=_("gui.button.organize_files"), 
                                       command=self.run_organize, width=15)
         self.organize_btn.grid(row=0, column=1, padx=5)
         
-        self.generate_btn = ttk.Button(step_frame, text="Generate Cards", 
+        self.generate_btn = ttk.Button(step_frame, text=_("gui.button.generate_cards"), 
                                       command=self.run_generate_cards, width=15)
         self.generate_btn.grid(row=0, column=2, padx=(5, 0))
         
         # Run all button
-        self.all_btn = ttk.Button(actions_frame, text="🎯 Run All Steps", 
+        self.all_btn = ttk.Button(actions_frame, text=_("gui.button.run_all"), 
                                  command=self.run_all, width=50)
         self.all_btn.grid(row=1, column=0, pady=(10, 0))
         
     def create_status_section(self, parent, row):
-        status_frame = ttk.LabelFrame(parent, text="📊 Status", padding="10")
+        status_frame = ttk.LabelFrame(parent, text=_("gui.section.status"), padding="10")
         status_frame.grid(row=row, column=0, sticky="ew", pady=(0, 10))
         status_frame.grid_columnconfigure(0, weight=1)
         
-        self.status_label = ttk.Label(status_frame, text="Ready", foreground="gray")
+        self.status_label = ttk.Label(status_frame, text=_("gui.status.ready"), foreground="gray")
         self.status_label.grid(row=0, column=0, sticky="w")
         
-        ttk.Button(status_frame, text="Clear Console", 
+        ttk.Button(status_frame, text=_("gui.button.clear_console"), 
                   command=self.clear_console).grid(row=0, column=1, sticky="e")
         
     def create_console_section(self, parent, row):
-        console_frame = ttk.LabelFrame(parent, text="Console Output", padding="10")
+        console_frame = ttk.LabelFrame(parent, text=_("gui.section.console_output"), padding="10")
         console_frame.grid(row=row, column=0, sticky="ew", pady=(0, 0))
         console_frame.grid_columnconfigure(0, weight=1)
         
@@ -488,13 +569,7 @@ class IrishAnkiGUI:
         
     def clear_console(self):
         self.console.delete(1.0, tk.END)
-        help_text = """Console output will appear here...
-
-💡 Quick Start:
-1. Select your Input Directory with audio files
-2. Click 'Run All Steps' for the complete workflow
-3. Import the generated .apkg file into Anki
-"""
+        help_text = _("gui.console.help_text")
         self.console.insert(tk.END, help_text)
         
     def set_status(self, status):
@@ -518,7 +593,7 @@ class IrishAnkiGUI:
         # Use our custom directory picker
         dialog = DirectoryPickerDialog(
             self.root, 
-            title="Select Input Directory with Audio Files",
+            title=_("gui.dialog.select_input_directory"),
             initial_dir=initial_dir
         )
         selected_directory = dialog.show()
@@ -528,7 +603,7 @@ class IrishAnkiGUI:
             
     def select_output_file(self):
         filename = filedialog.asksaveasfilename(
-            title="Save Anki Deck As",
+            title=_("gui.dialog.save_anki_deck"),
             defaultextension=".apkg",
             filetypes=[("Anki Package", "*.apkg"), ("All Files", "*.*")]
         )
