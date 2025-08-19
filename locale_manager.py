@@ -2,15 +2,27 @@
 
 import json
 import os
+import sys
 from pathlib import Path
 from typing import Dict, Optional
+
+
+def resource_path(relative_path):
+    """Get absolute path to resource, works for dev and for PyInstaller"""
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    
+    return os.path.join(base_path, relative_path)
 
 
 class LocaleManager:
     """Manages localization for the Irish Anki application."""
     
     def __init__(self, locale_dir: str = "locales", default_locale: str = "en"):
-        self.locale_dir = Path(locale_dir)
+        self.locale_dir = Path(resource_path(locale_dir))
         self.default_locale = default_locale
         self.current_locale = default_locale
         self.strings: Dict[str, str] = {}
@@ -154,6 +166,30 @@ class LocaleManager:
                     "completed": "Completed!",
                     "failed": "Failed",
                     "error": "Error occurred"
+                },
+                "console": {
+                    "help_text": "Console output will appear here...\n\n💡 Quick Start:\n1. Select your Input Directory with audio files\n2. Click 'Run All Steps' for the complete workflow\n3. Import the generated .apkg file into Anki\n"
+                },
+                "workflow": {
+                    "title": "📖 How it works (click to expand)",
+                    "title_collapsed": "📖 How it works (click to collapse)",
+                    "description": "Workflow: Audio Files → MP3 → Organized by Rhythm → Anki Deck\n\n1. 🎵 PROCESS: Converts audio formats (.m4a, .wav, .flac, etc.) to MP3 or copies existing MP3s\n2. 🗂️  ORGANIZE: Searches thesession.org for metadata and organizes by rhythm  \n3. 🎴 GENERATE: Creates Anki .apkg file with audio cards\n\n💡 You can run steps individually or use 'Run All Steps' for the complete workflow"
+                },
+                "card_layout": {
+                    "instruction": "Choose what appears on the front and back of your Anki cards:",
+                    "preview": "💡 Default: 🎵 Audio on front, 🏷️ Name + 🎼 Key + 🎭 Rhythm on back"
+                },
+                "dialog": {
+                    "select_directory": "Select Directory",
+                    "select_input_directory": "Select Input Directory with Audio Files",
+                    "save_anki_deck": "Save Anki Deck As"
+                },
+                "file_types": {
+                    "folder": "📁 Folder",
+                    "audio": "🎵 Audio",
+                    "file": "📄 File",
+                    "error": "Error",
+                    "permission_denied": "[Permission Denied]"
                 }
             },
             "cli": {

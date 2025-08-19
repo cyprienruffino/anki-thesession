@@ -6,7 +6,7 @@ a = Analysis(
     ['gui.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[('locales', 'locales')],
     hiddenimports=[
         'requests',
         'bs4',
