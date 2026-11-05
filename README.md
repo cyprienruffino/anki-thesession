@@ -529,6 +529,20 @@ export/
 - **Ainm ar dtús**: 🏷️ → 🎵🎼🎭  
 - **Traenáil eochrach**: 🎵 → 🎼
 
+## 🎶 Easpórtáil go Cadence
+
+Is aip athrá spásáilte é [Cadence](https://github.com/Batpapa/Cadence) le huirlisí do cheoltóirí traidisiúnta na hÉireann. Tiontaíonn `anki2cdc.py` comhad `.apkg` a gineadh go pacáistí cártaí Cadence (`.cdc`), leis an leabharlann chaighdeánach amháin:
+
+```bash
+python anki2cdc.py irish_music.apkg --out-dir cadence/
+```
+
+Ansin i Cadence: **+ New card → Import → Choose a .cdc file**, uair amháin do gach pacáiste.
+
+- Níl aghaidh/cúl ag Cadence agus taispeánann sé ainm an chárta i gcónaí le linn athbhreithnithe, mar sin tugtar hais randamach mar ainm ar gach cárta (agus ar an gcomhad mp3 freisin). Tá an t-ainm, an eochair agus an rithim taobh thiar de chnaipe **Show answer** sna nótaí.
+- Coinnítear an fíor-ainm mar ailias: aimsíonn cuardach na leabharlainne an fonn fós.
+- Roinntear deiceanna móra ina bpacáistí de thart ar 125 MB fuaime (`deck-1of3.cdc`, …), mar d'fhéadfadh comhad ollmhór amháin a bheith rómhór le lódáil i mbrabhsálaí.
+
 ## ⚙️ Úsáid Chasta (Líne na nOrduithe)
 
 Le haghaidh uathoibrithe nó úsáideoirí chasta, tá an comhéadan líne orduithe fós ar fáil:
