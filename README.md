@@ -109,6 +109,20 @@ export/
 - **Name-first**: 🏷️ → 🎵🎼🎭  
 - **Key training**: 🎵 → 🎼
 
+## 🎶 Export to Cadence
+
+[Cadence](https://github.com/Batpapa/Cadence) is a spaced-repetition app with tools for Irish trad musicians. `anki2cdc.py` turns a generated `.apkg` into Cadence card packs (`.cdc`), standard library only:
+
+```bash
+python anki2cdc.py irish_music.apkg --out-dir cadence/
+```
+
+Then in Cadence: **+ New card → Import → Choose a .cdc file**, once per pack.
+
+- Cadence has no front/back and always shows a card's name while reviewing, so each card is named with a random hash (also the mp3 filename). Name, key and rhythm are behind a **Show answer** toggle in the notes.
+- The real name is kept as an alias: library search still finds the tune.
+- Large decks are split into packs of ~125 MB of audio (`deck-1of3.cdc`, …), since a single huge file can be too big for a browser to load.
+
 ## ⚙️ Advanced Usage (Command Line)
 
 For automation or advanced users, the command-line interface is still available:
@@ -305,6 +319,20 @@ export/
 - **Nom d'abord** : 🏷️ → 🎵🎼🎭  
 - **Entraînement tonalité** : 🎵 → 🎼
 
+## 🎶 Export vers Cadence
+
+[Cadence](https://github.com/Batpapa/Cadence) est une application de répétition espacée avec des outils pour les musiciens de trad irlandais. `anki2cdc.py` convertit un `.apkg` généré en paquets de cartes Cadence (`.cdc`), avec la seule bibliothèque standard :
+
+```bash
+python anki2cdc.py irish_music.apkg --out-dir cadence/
+```
+
+Puis dans Cadence : **+ Nouvelle carte → Importer → Choisir un fichier .cdc**, une fois par paquet.
+
+- Cadence n'a pas de recto/verso et affiche toujours le nom de la carte en révision : chaque carte est donc nommée par un hash aléatoire (aussi utilisé comme nom du mp3). Nom, tonalité et rythme sont derrière un bouton **Show answer** dans les notes.
+- Le vrai nom est conservé comme alias : la recherche de la bibliothèque trouve toujours l'air.
+- Les gros decks sont découpés en paquets d'environ 125 Mo d'audio (`deck-1of3.cdc`, …), un seul fichier énorme pouvant être trop gros pour un navigateur.
+
 ## ⚙️ Utilisation Avancée (Ligne de Commande)
 
 Pour l'automatisation ou les utilisateurs avancés, l'interface en ligne de commande est toujours disponible :
@@ -500,6 +528,20 @@ export/
 - **Fuaim ar dtús** (réamhshocrú): 🎵 → 🏷️🎼🎭
 - **Ainm ar dtús**: 🏷️ → 🎵🎼🎭  
 - **Traenáil eochrach**: 🎵 → 🎼
+
+## 🎶 Easpórtáil go Cadence
+
+Is aip athrá spásáilte é [Cadence](https://github.com/Batpapa/Cadence) le huirlisí do cheoltóirí traidisiúnta na hÉireann. Tiontaíonn `anki2cdc.py` comhad `.apkg` a gineadh go pacáistí cártaí Cadence (`.cdc`), leis an leabharlann chaighdeánach amháin:
+
+```bash
+python anki2cdc.py irish_music.apkg --out-dir cadence/
+```
+
+Ansin i Cadence: **+ New card → Import → Choose a .cdc file**, uair amháin do gach pacáiste.
+
+- Níl aghaidh/cúl ag Cadence agus taispeánann sé ainm an chárta i gcónaí le linn athbhreithnithe, mar sin tugtar hais randamach mar ainm ar gach cárta (agus ar an gcomhad mp3 freisin). Tá an t-ainm, an eochair agus an rithim taobh thiar de chnaipe **Show answer** sna nótaí.
+- Coinnítear an fíor-ainm mar ailias: aimsíonn cuardach na leabharlainne an fonn fós.
+- Roinntear deiceanna móra ina bpacáistí de thart ar 125 MB fuaime (`deck-1of3.cdc`, …), mar d'fhéadfadh comhad ollmhór amháin a bheith rómhór le lódáil i mbrabhsálaí.
 
 ## ⚙️ Úsáid Chasta (Líne na nOrduithe)
 
